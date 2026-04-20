@@ -3,10 +3,11 @@ import random
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart
-from aiogram.utils.keyboard import InlineKeyboardBuilder # Импортируем билдер
+from aiogram.utils.keyboard import InlineKeyboardBuilder 
 from telethon import TelegramClient
 from telethon.tl.functions.account import CheckUsernameRequest
 import httpx
+from aiohttp import web
 
 BOT_TOKEN = "8539154569:AAE8X08Fci6qZeXsYQIrqvJekck7pbO8SDI"
 API_ID = 26782706
@@ -16,6 +17,19 @@ bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 client = TelegramClient("session", API_ID, API_HASH)
+
+
+async def handle(request):
+    return web.Response(text="Бот запущен и работает!")
+
+async def run_keep_alive():
+    app = web.Application()
+    app.router.add_get('/', handle)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 10000) 
+    await site.start()
+
 
 
 
@@ -140,6 +154,10 @@ async def run_search(call: CallbackQuery):
 
 
 async def main():
+    # Запускаем веб-сервер для Render
+    await run_keep_alive()
+    print("Web server started on port 10000")
+    
     await client.start()
     await dp.start_polling(bot)
 
